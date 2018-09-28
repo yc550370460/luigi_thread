@@ -4,7 +4,7 @@ import requests
 import logging
 import json
 import time
-import threading
+import gevent
 import bs4
 
 CURRENT_DIR = os.path.dirname(os.path.abspath(__file__))
@@ -56,37 +56,33 @@ class Download(luigi.Task):
         print start_time
 
         url_list_list = list()
-        threading_groups = list()
+        gevent_groups = list()
         with self.input().open("r") as d:
             url_list = json.load(d)
         # use multiple threading
-        # for i in xrange(0, len(url_list), THREAD_COUNT):
-        #     tmp = list()
-        #     for j in xrange(THREAD_COUNT):
-        #         if i + j < len(url_list):
-        #             tmp.append(url_list[i + j])
-        #     url_list_list.append(tmp)
-        # for item in url_list_list:
-        #     for h in item:
-        #         threading_group = threading.Thread(target=self.fetch, args=(h, ))
-        #         threading_group.setDaemon(True)
-        #         threading_group.start()
-        #         threading_groups.append(threading_group)
-        #     for k in threading_groups:
-        #         k.join()
+        for i in xrange(0, len(url_list), THREAD_COUNT):
+            tmp = list()
+            for j in xrange(THREAD_COUNT):
+                if i + j < len(url_list):
+                    tmp.append(url_list[i + j])
+            url_list_list.append(tmp)
+        for item in url_list_list:
+            for h in item:
+                gevent_groups.append(gevent.spawn(self.fetch, h))
+            gevent.joinall(gevent_groups)
 
 
 
         # not use multiple threading
-        for url in url_list:
-            response = RequestProxy().request_get(url)
-
-            bs_tmp = bs4.BeautifulSoup(response.content, "html.parser", from_encoding="utf-8")
-            img_tag_list =  bs_tmp.find_all("img")
-            for item in img_tag_list:
-                if item.get("class", None):
-                    if item.get("class")[0] == "mimg":
-                        self.img_list.append(item["src"])
+        # for url in url_list:
+        #     response = Request_proxy().request_get(url)
+        #
+        #     bs_tmp = bs4.BeautifulSoup(response.content, "html.parser", from_encoding="utf-8")
+        #     img_tag_list =  bs_tmp.find_all("img")
+        #     for item in img_tag_list:
+        #         if item.get("class", None):
+        #             if item.get("class")[0] == "mimg":
+        #                 self.img_list.append(item["src"])
         with self.output().open("w") as f:
             json.dump(self.img_list, f, indent=4)
         print time.time() - start_time
