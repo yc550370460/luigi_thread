@@ -140,6 +140,8 @@ class GetList(luigi.Task):
             json.dump(url_list, f, indent=4)
 
 if __name__ == "__main__":
+    # create slack app and bound app link to the specified channel or people
+    # https://api.slack.com/tutorials/slack-apps-hello-world
     with monitor(slack_url="https://hooks.slack.com/services/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", max_print=10, username="FooBar Monitor"):
         luigi.run(main_task_cls=Save)
 
