@@ -6,6 +6,7 @@ import json
 import time
 import threading
 import bs4
+from luigi_monitor import monitor
 
 CURRENT_DIR = os.path.dirname(os.path.abspath(__file__))
 URL_LIST_DIR = os.path.join(CURRENT_DIR, "list")
@@ -139,5 +140,6 @@ class GetList(luigi.Task):
             json.dump(url_list, f, indent=4)
 
 if __name__ == "__main__":
-    luigi.run(main_task_cls=Save, cmdline_args=['--local-scheduler'])
+    with monitor(slack_url="https://hooks.slack.com/services/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", max_print=10, username="FooBar Monitor"):
+        luigi.run(main_task_cls=Save)
 
