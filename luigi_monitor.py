@@ -60,25 +60,6 @@ class Download(luigi.Task):
         threading_groups = list()
         with self.input().open("r") as d:
             url_list = json.load(d)
-        # use multiple threading
-        # for i in xrange(0, len(url_list), THREAD_COUNT):
-        #     tmp = list()
-        #     for j in xrange(THREAD_COUNT):
-        #         if i + j < len(url_list):
-        #             tmp.append(url_list[i + j])
-        #     url_list_list.append(tmp)
-        # for item in url_list_list:
-        #     for h in item:
-        #         threading_group = threading.Thread(target=self.fetch, args=(h, ))
-        #         threading_group.setDaemon(True)
-        #         threading_group.start()
-        #         threading_groups.append(threading_group)
-        #     for k in threading_groups:
-        #         k.join()
-
-
-
-        # not use multiple threading
         for url in url_list:
             response = RequestProxy().request_get(url)
 

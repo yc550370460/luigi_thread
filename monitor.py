@@ -30,6 +30,7 @@ class Monitor(object):
         self.event_status["SUCCESS"].append({"status": "success", "task": str(task)})
 
     def send_message(self):
+        # you can design you own message notification method
         print self.event_status
 
     def set_handler(self):
